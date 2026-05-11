@@ -75,9 +75,8 @@ public class GuiDialogQuestEditor : GuiDialog
             .AddStaticText("Откат, реальных часов", CairoFont.WhiteSmallText(), ElementBounds.Fixed(30, 405, 180, 25))
             .AddNumberInput(ElementBounds.Fixed(230, 402, 95, 30), text => quest.CooldownHours = ParseInt(text, 24), CairoFont.WhiteSmallText(), "cooldown")
 
-            .AddStaticText("Награды 3x3", CairoFont.WhiteMediumText(), ElementBounds.Fixed(30, 465, 220, 25))
             .AddStaticText("Перетащи предметы в эти ячейки. При выполнении они будут выданы игроку.", CairoFont.WhiteSmallText(), ElementBounds.Fixed(190, 468, 660, 25))
-            .AddItemSlotGrid(rewardsInventory, OnRewardSlotModified, 3, ElementBounds.Fixed(30, 505, 190, 115), "rewardslots")
+            .AddItemSlotGrid(rewardsInventory, OnRewardSlotModified, 3, ElementBounds.Fixed(30, 490, 190, 170), "rewardslots")
 
             .AddSmallButton("Сохранить", SaveQuest, ElementBounds.Fixed(710, 625, 140, 35))
             .EndChildElements()

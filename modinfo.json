@@ -1,0 +1,13 @@
+{
+  "type": "code",
+  "modid": "forgottenquests",
+  "name": "Forgotten Quests",
+  "authors": [
+    "KyCOK_KOTEuKu"
+  ],
+  "description": "Система квестов для сервера Forgotten legends.",
+  "version": "1.0.0",
+  "dependencies": {
+    "game": ""
+  }
+}

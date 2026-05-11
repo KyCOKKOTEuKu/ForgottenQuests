@@ -52,3 +52,10 @@ public class QuestCompletedClientPacket
     [ProtoMember(1)]
     public string QuestTitle { get; set; } = "";
 }
+
+[ProtoContract]
+public class DeleteQuestPacket
+{
+    [ProtoMember(1)]
+    public string QuestId { get; set; } = "";
+}

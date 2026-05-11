@@ -40,7 +40,7 @@ public class GuiDialogQuestEditor : GuiDialog
 
     private void ComposeDialog()
     {
-        ElementBounds bg = ElementBounds.Fixed(0, 0, 900, 680);
+                    ElementBounds bg = ElementBounds.Fixed(0, 0, 900, 680);
         ElementBounds dialogBounds = ElementStdBounds.AutosizedMainDialog.WithAlignment(EnumDialogArea.CenterMiddle);
 
         SingleComposer = capi.Gui.CreateCompo("forgottenquests-editor-" + quest.Id, dialogBounds)
@@ -78,6 +78,7 @@ public class GuiDialogQuestEditor : GuiDialog
             .AddStaticText("Перетащи предметы в эти ячейки. При выполнении они будут выданы игроку.", CairoFont.WhiteSmallText(), ElementBounds.Fixed(190, 468, 660, 25))
             .AddItemSlotGrid(rewardsInventory, OnRewardSlotModified, 3, ElementBounds.Fixed(30, 490, 190, 170), "rewardslots")
 
+            .AddSmallButton("Удалить", DeleteQuest, ElementBounds.Fixed(550, 625, 140, 35))
             .AddSmallButton("Сохранить", SaveQuest, ElementBounds.Fixed(710, 625, 140, 35))
             .EndChildElements()
             .Compose();
@@ -119,6 +120,19 @@ public class GuiDialogQuestEditor : GuiDialog
         }
     }
 
+        private bool DeleteQuest()
+        {
+            if (!string.IsNullOrWhiteSpace(quest.Id))
+            {
+                capi.Network.GetChannel(ForgottenQuestsModSystem.ChannelName)
+                    .SendPacket(new DeleteQuestPacket { QuestId = quest.Id });
+            }
+
+            TryClose();
+            return true;
+        }
+
+
     private bool SaveQuest()
     {
         quest.TargetStack = QuestItemStackData.FromItemStack(targetInventory[0].Itemstack);
@@ -145,4 +159,5 @@ public class GuiDialogQuestEditor : GuiDialog
     {
         return double.TryParse(text, out double value) ? value : 0;
     }
-}
+        }
+

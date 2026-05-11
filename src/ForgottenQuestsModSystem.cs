@@ -19,6 +19,7 @@ public class ForgottenQuestsModSystem : ModSystem
             .RegisterMessageType<RequestQuestListPacket>()
             .RegisterMessageType<QuestListPacket>()
             .RegisterMessageType<SaveQuestPacket>()
+            .RegisterMessageType<DeleteQuestPacket>()
             .RegisterMessageType<ClaimQuestRewardPacket>()
             .RegisterMessageType<SubmitQuestItemPacket>()
             .RegisterMessageType<QuestCompletedClientPacket>();

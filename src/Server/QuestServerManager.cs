@@ -41,6 +41,7 @@ public class QuestServerManager
         sapi.Network.GetChannel(ForgottenQuestsModSystem.ChannelName)
             .SetMessageHandler<RequestQuestListPacket>(OnRequestQuestList)
             .SetMessageHandler<SaveQuestPacket>(OnSaveQuest)
+            .SetMessageHandler<DeleteQuestPacket>(OnDeleteQuest)
             .SetMessageHandler<ClaimQuestRewardPacket>(OnClaimQuestReward)
             .SetMessageHandler<SubmitQuestItemPacket>(OnSubmitQuestItem);
 
@@ -230,6 +231,24 @@ public class QuestServerManager
         return player.WorldData.CurrentGameMode == EnumGameMode.Creative
             || player.HasPrivilege(ForgottenQuestsModSystem.QuestGiverPrivilege);
     }
+
+        private void OnDeleteQuest(IServerPlayer player, DeleteQuestPacket packet)
+        {
+            if (!CanEditQuests(player))
+            {
+                player.SendMessage(GlobalConstants.GeneralChatGroup, "Нет прав на удаление квестов.", EnumChatType.Notification);
+                return;
+            }
+
+            if (packet == null || string.IsNullOrWhiteSpace(packet.QuestId)) return;
+
+            int removed = quests.RemoveAll(q => q.Id == packet.QuestId);
+            if (removed <= 0) return;
+
+            SaveQuests();
+            BroadcastQuestLists();
+        }
+
 
     private void OnSaveQuest(IServerPlayer fromPlayer, SaveQuestPacket packet)
     {

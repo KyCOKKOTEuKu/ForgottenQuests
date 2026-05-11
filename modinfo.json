@@ -6,7 +6,7 @@
     "KyCOK_KOTEuKu"
   ],
   "description": "Система квестов для сервера Forgotten legends.",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "dependencies": {
     "game": ""
   }

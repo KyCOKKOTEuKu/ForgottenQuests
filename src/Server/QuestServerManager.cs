@@ -549,48 +549,64 @@ public class QuestServerManager
     private bool IsPlayerAtQuestPosition(IServerPlayer player, QuestData quest)
     {
         double radius = Math.Max(1, quest.Radius);
+        double radiusSq = radius * radius;
+
         Vec3d pos = player.Entity.Pos.XYZ;
 
-        // Основная проверка: реальные абсолютные координаты мира.
-        if (DistanceSq(pos.X, pos.Y, pos.Z, quest.TargetX, quest.TargetY, quest.TargetZ) <= radius * radius) return true;
+        // 1) Абсолютные координаты мира.
+        // Это координаты вида =x =y =z, которые видны в debug/командах.
+        if (IsInsideRadius(pos.X, pos.Y, pos.Z, quest.TargetX, quest.TargetY, quest.TargetZ, radiusSq)) return true;
 
-        // Если Y оставлен 0, проверяем только X/Z. Это удобно для отметки точки без высоты.
-        if (Math.Abs(quest.TargetY) < 0.001)
+        // 2) Игроковые/HUD координаты.
+        // В Vintage Story X и Z показываются относительно точки спавна/центра координат,
+        // а Y остается обычной высотой. Поэтому НЕЛЬЗЯ вычитать spawn.Y.
+        Vec3d? origin = TryGetPrettyCoordinateOrigin();
+        if (origin != null)
         {
-            double dx = pos.X - quest.TargetX;
-            double dz = pos.Z - quest.TargetZ;
-            if (dx * dx + dz * dz <= radius * radius) return true;
-        }
+            double prettyX = pos.X - origin.X;
+            double prettyY = pos.Y;
+            double prettyZ = pos.Z - origin.Z;
 
-        // Дополнительная проверка для координат относительно спавна, которые часто видит игрок в интерфейсе.
-        Vec3d? spawn = TryGetSpawnPosition();
-        if (spawn != null)
-        {
-            double rx = pos.X - spawn.X;
-            double ry = pos.Y - spawn.Y;
-            double rz = pos.Z - spawn.Z;
-            if (DistanceSq(rx, ry, rz, quest.TargetX, quest.TargetY, quest.TargetZ) <= radius * radius) return true;
-
-            if (Math.Abs(quest.TargetY) < 0.001)
-            {
-                double dx = rx - quest.TargetX;
-                double dz = rz - quest.TargetZ;
-                if (dx * dx + dz * dz <= radius * radius) return true;
-            }
+            if (IsInsideRadius(prettyX, prettyY, prettyZ, quest.TargetX, quest.TargetY, quest.TargetZ, radiusSq)) return true;
         }
 
         return false;
     }
 
-    private Vec3d? TryGetSpawnPosition()
+    private static bool IsInsideRadius(double px, double py, double pz, double tx, double ty, double tz, double radiusSq)
     {
-        foreach (string propName in new[] { "DefaultSpawnPosition", "SpawnPosition" })
+        // Если Y в квесте оставлен 0, считаем только X/Z.
+        // Это удобно для заданий "прийти в область" без точной высоты.
+        if (Math.Abs(ty) < 0.001)
+        {
+            double dx = px - tx;
+            double dz = pz - tz;
+            return dx * dx + dz * dz <= radiusSq;
+        }
+
+        return DistanceSq(px, py, pz, tx, ty, tz) <= radiusSq;
+    }
+
+    private Vec3d? TryGetPrettyCoordinateOrigin()
+    {
+        try
+        {
+            EntityPos? spawn = sapi.World.DefaultSpawnPosition;
+            if (spawn != null) return spawn.XYZ;
+        }
+        catch
+        {
+            // fallback ниже
+        }
+
+        foreach (string propName in new[] { "SpawnPosition" })
         {
             object? value = sapi.World.GetType().GetProperty(propName)?.GetValue(sapi.World);
             if (value is EntityPos ep) return ep.XYZ;
             if (value is Vec3d vec) return vec;
             if (value is BlockPos bp) return new Vec3d(bp.X, bp.Y, bp.Z);
         }
+
         return null;
     }
 
